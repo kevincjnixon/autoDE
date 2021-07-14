@@ -176,8 +176,18 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, retExplore=F){
         names(condList)[i]<-names(res)[i]
       }
       res2<-res
+      ID<-FALSE
+      type<-NULL
       if(length(grep("ENS", rownames(normCounts)))>0){
-        message("Ensembl Gene IDs detected and must be converted to gene symbols for exploreData.")
+        ID<-TRUE
+        type<-"Ensembl"
+      }
+      if(length(grep("FBgn", rownames(normCounts)))>0){
+        ID<-TRUE
+        type<-"Flybase"
+      }
+      if(isTRUE(ID)){
+        message(type," Gene IDs detected and must be converted to gene symbols for exploreData.")
         message("Please indicate the species of your samples:")
         print(paste(c(1:3),c("Human","Mouse","Drosophila")))
         options<-c("hsapiens","mmusculus","dmelanogaster")
