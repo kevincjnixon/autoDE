@@ -1,0 +1,192 @@
+#' Automatic Differential Expression Analysis using DESeq2
+#'
+#' Obtain DESeq2 Normalized results
+#'
+#' @param sampleTable Filename indicating the sampleTable tab delimited file pointing to HTSeq-count files.
+#' @param countTable Filename indicating the raw count table tab delimited file (use for featureCounts output and with colData)
+#' @param colData Filename indicating the tab delimited file containing metadata for countTable
+#' @param retExplore Boolean indicating if BinfTools::exploreData() function should also be returned. Requires gene symbols, and BinfTools/gpGeneSets packages. Default=F
+#' @return List with DESeq2 analyzed data: results, normalized counts, and conditions
+#' @export
+
+autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, retExplore=F){
+  dds<-NULL
+  condition<-NULL
+  conName<-NULL #contrast name
+  if(!is.null(sampleTable)){
+    message("sampleTable of HTSeq-count files provided.")
+    st<-sampleTable
+    if(is.character(sampleTable)){
+      message("sampleTable was filename. Reading sampleTable as tab-delimited file.")
+      st<-read.delim(sampleTable)
+      st[,2]<-as.character(st[,2])
+    }
+    cols<-colnames(st)[c(3:ncol(st))]
+    message(length(cols)," metadata columns for ",nrow(st)," samples found:")
+    print(cols)
+    if(length(grep("Batch", cols))>0){
+      message("Metadata column named 'Batch' found. Using for batch correction in design.")
+      cols<-cols[-which(cols %in% "Batch")]
+      if(length(cols)>1){
+        #With the column 'Batch', we still have more than 2 columns, meaning multivariate analysis
+        message("Remaining metadata columns to be combined for multivariate analysis")
+        st$combined<-st[,`cols[1]`]
+        for(i in 2:length(cols)){
+          st$combined<-paste(st$combined, st[,`cols[i]`], sep=".")
+        }
+        dds<-DESeq2::DESeqDataSetFromHTSeqCount(sampleTable=st, design = ~ Batch + combined)
+        condition<-as.character(dds$combined)
+        conName<-"combined"
+      } else {
+        message("One remaining metdata column will be used as design")
+        st$condition<-st[,`cols`]
+        #print(head(st))
+        dds<-DESeq2::DESeqDataSetFromHTSeqCount(sampleTable=st, design = ~ Batch + condition)
+        condition<-as.character(dds$condition)
+        conName<-"condition"
+      }
+    } else {
+      message("No column named Batch. No batch correction will be performed.")
+      if(length(cols)>1){
+        #With the column 'Batch', we still have more than 2 columns, meaning multivariate analysis
+        message("Multiple metadata columns to be combined for multivariate analysis")
+        st$combined<-st[,`cols[1]`]
+        for(i in 2:length(cols)){
+          st$combined<-paste(st$combined, st[,`cols[i]`], sep=".")
+        }
+        dds<-DESeq2::DESeqDataSetFromHTSeqCount(sampleTable=st, design = ~ combined)
+        condition<-as.character(dds$combined)
+        conName<-"combined"
+      } else {
+        message("One metdata column will be used as design")
+        st$condition<-st[,`cols`]
+        dds<-DESeq2::DESeqDataSetFromHTSeqCount(sampleTable=st, design = ~ condition)
+        condition<-as.character(dds$condition)
+        conName<-"condition"
+      }
+    }
+  }
+  if(!is.null(countTable) & !is.null(colData)){
+    message("countTable and colData provided.")
+    ct<-countTable
+    cd<-colData
+    if(is.character(countTable)){
+      message("countTable is filename. Reading countTable from tab-delimited file.")
+      ct<-read.delim(countTable)
+    }
+    ct<-as.matrix(ct)
+    if(is.character(colData)){
+      message("colData is filename. Reading colData from tab-delimited file.")
+      cd<-read.delim(colData)
+    }
+
+    cols<-colnames(cd)[c(1:ncol(cd))]
+    message(length(cols)," metadata columns for ",nrow(cd)," samples found:")
+    print(cols)
+    if(length(grep("Batch", cols))>0){
+      message("Metadata column named 'Batch' found. Using for batch correction in design.")
+      cols<-cols[-which(cols %in% "Batch")]
+      if(length(cols)>1){
+        #With the column 'Batch', we still have more than 2 columns, meaning multivariate analysis
+        message("Remaining metadata columns to be combined for multivariate analysis")
+        cd$combined<-cd[,`cols[1]`]
+        for(i in 2:length(cols)){
+          cd$combined<-paste(cd$combined, cd[,`cols[i]`], sep=".")
+        }
+        dds<-DESeq2::DESeqDataSetFromMatrix(countData=ct, colData=cd, design = ~ Batch + combined)
+        condition<-as.character(dds$combined)
+        conName<-"combined"
+      } else {
+        message("One remaining metdata column will be used as design")
+        cd$condition<-cd[,`cols`]
+        dds<-DESeq2::DESeqDataSetFromMatrix(countData=ct, colData=cd, design = ~ Batch + condition)
+        condition<-as.character(dds$condition)
+        conName<-"condition"
+      }
+    } else {
+      message("No column named Batch. No batch correction will be performed.")
+      if(length(cols)>1){
+        #With the column 'Batch', we still have more than 2 columns, meaning multivariate analysis
+        message("Multiple metadata columns to be combined for multivariate analysis")
+        cd$combined<-cd[,`cols[1]`]
+        for(i in 2:length(cols)){
+          cd$combined<-paste(cd$combined, cd[,`cols[i]`], sep=".")
+        }
+        dds<-DESeq2::DESeqDataSetFromMatrix(countData=ct, colData=cd, design = ~ combined)
+        condition<-as.character(dds$combined)
+        conName<-"combined"
+      } else {
+        message("One metdata column will be used as design")
+        cd$condition<-cd[,`cols`]
+        dds<-DESeq2::DESeqDataSetFromMatrix(countData=ct, colData=cd, design = ~ condition)
+        condition<-as.character(dds$condition)
+        conName<-"condition"
+      }
+    }
+  }
+  message("DESeq2 dataset built!")
+  message("Filtering genes with no reads in any sample.")
+  dds<-dds[rowMeans(DESeq2::counts(dds))>0,]
+
+  message("Running DESeq2.")
+  dds<-DESeq2::DESeq(dds)
+
+  res<-NULL
+  message(length(unique(condition)), " conditions identified.")
+  if(length(unique(condition))==2){
+    message("Only one comparison to be performed.")
+    message("Assuming first named condition is reference condition: ", unique(condition)[1])
+    res<-DESeq2::results(dds, contrast=c(conName, unique(condition)[2], unique(condition)[1]))
+  } else {
+    message("Multiple comparisons can be performed.")
+    message("Performing pairwise comparisons.")
+    res<-list()
+    index<-1
+    for(i in 1:length(unique(condition))){
+      for(k in (i+1):length(unique(condition))){
+        if(i<length(unique(condition))){
+          compName<-paste(unique(condition)[k], unique(condition)[i], sep="v")
+          message("Making results for: ", compName)
+          #message("Storing in res[[",index,"]]")
+          res[[index]]<-DESeq2::results(dds, contrast=c(conName, unique(condition)[k], unique(condition)[i]))
+          names(res)[index]<-compName
+          index<-index+1
+        }
+      }
+    }
+  }
+  normCounts<-as.data.frame(DESeq2::counts(dds, normalized=T))
+
+  if(isTRUE(retExplore)){
+    if(is.list(res)){
+      countList<-list()
+      condList<-list()
+      for(i in 1:length(res)){
+        countList[[i]]<-normCounts
+        condList[[i]]<-condition
+        names(countList)[i]<-names(res)[i]
+        names(condList)[i]<-names(res)[i]
+      }
+      res2<-res
+      if(length(grep("ENS", rownames(normCounts)))>0){
+        message("Ensembl Gene IDs detected and must be converted to gene symbols for exploreData.")
+        message("Please indicate the species of your samples:")
+        print(paste(c(1:3),c("Human","Mouse","Drosophila")))
+        options<-c("hsapiens","mmusculus","dmelanogaster")
+        targets<-c("HGNC","MGI","FLYBASENAME_GENE")
+        opt<-as.numeric(readline("Enter your selection: "))
+        res2<-lapply(res, BinfTools::getSym, obType="res", species=options[opt], target=targets[opt])
+        countList<-lapply(countList, BinfTools::getSym, obType="counts", species=options[opt], target=targets[opt])
+        res<-lapply(res, BinfTools::getSym, obType="res", species=options[opt], target=targets[opt], addCol=T)
+        normCounts<-BinfTools::getSym(normCounts, obType="counts", species=options[opt], target=targets[opt], addCol=T)
+      }
+      explore<-BinfTools::exploreData(res=res2, counts=countList, cond=condList)
+      return(list(normCounts=normCounts, res=res, condition=condition, explore=explore))
+    } else{
+      explore<-BinfTools::exploreData(res=res, counts=normCounts, cond=condition)
+      return(list(normCounts=normCounts, res=res, condition=condition, explore=explore))
+    }
+  } else{
+    return(list(normCounts=normCounts, res=res, condition=condition))
+  }
+}
