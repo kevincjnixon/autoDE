@@ -81,7 +81,7 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, retExplore=F){
     ct<-as.matrix(ct)
     if(is.character(colData)){
       message("colData is filename. Reading colData from tab-delimited file.")
-      cd<-read.delim(colData)
+      cd<-read.delim(colData, row.names=1)
     }
 
     cols<-colnames(cd)[c(1:ncol(cd))]
