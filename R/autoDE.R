@@ -30,9 +30,11 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, retExplore=F){
       if(length(cols)>1){
         #With the column 'Batch', we still have more than 2 columns, meaning multivariate analysis
         message("Remaining metadata columns to be combined for multivariate analysis")
-        st$combined<-st[,`cols[1]`]
+        x<-cols[1]
+        st$combined<-st[,`x`]
         for(i in 2:length(cols)){
-          st$combined<-paste(st$combined, st[,`cols[i]`], sep=".")
+          x<-cols[i]
+          st$combined<-paste(st$combined, st[,`x`], sep=".")
         }
         dds<-DESeq2::DESeqDataSetFromHTSeqCount(sampleTable=st, design = ~ Batch + combined)
         condition<-as.character(dds$combined)
@@ -50,9 +52,11 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, retExplore=F){
       if(length(cols)>1){
         #With the column 'Batch', we still have more than 2 columns, meaning multivariate analysis
         message("Multiple metadata columns to be combined for multivariate analysis")
-        st$combined<-st[,`cols[1]`]
+        x<-cols[1]
+        st$combined<-st[,`x`]
         for(i in 2:length(cols)){
-          st$combined<-paste(st$combined, st[,`cols[i]`], sep=".")
+          x<-cols[i]
+          st$combined<-paste(st$combined, st[,`x`], sep=".")
         }
         dds<-DESeq2::DESeqDataSetFromHTSeqCount(sampleTable=st, design = ~ combined)
         condition<-as.character(dds$combined)
@@ -89,9 +93,11 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, retExplore=F){
       if(length(cols)>1){
         #With the column 'Batch', we still have more than 2 columns, meaning multivariate analysis
         message("Remaining metadata columns to be combined for multivariate analysis")
-        cd$combined<-cd[,`cols[1]`]
+        x<-cols[1]
+        cd$combined<-cd[,`x`]
         for(i in 2:length(cols)){
-          cd$combined<-paste(cd$combined, cd[,`cols[i]`], sep=".")
+          x<-cols[i]
+          cd$combined<-paste(cd$combined, cd[,`x`], sep=".")
         }
         dds<-DESeq2::DESeqDataSetFromMatrix(countData=ct, colData=cd, design = ~ Batch + combined)
         condition<-as.character(dds$combined)
@@ -108,9 +114,11 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, retExplore=F){
       if(length(cols)>1){
         #With the column 'Batch', we still have more than 2 columns, meaning multivariate analysis
         message("Multiple metadata columns to be combined for multivariate analysis")
-        cd$combined<-cd[,`cols[1]`]
+        x<-cols[1]
+        cd$combined<-cd[,`x`]
         for(i in 2:length(cols)){
-          cd$combined<-paste(cd$combined, cd[,`cols[i]`], sep=".")
+          x<-cols[i]
+          cd$combined<-paste(cd$combined, cd[,`x`], sep=".")
         }
         dds<-DESeq2::DESeqDataSetFromMatrix(countData=ct, colData=cd, design = ~ combined)
         condition<-as.character(dds$combined)
