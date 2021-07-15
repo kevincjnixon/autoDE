@@ -4,7 +4,7 @@
 \alias{autoDE}
 \title{Automatic Differential Expression Analysis using DESeq2}
 \usage{
-autoDE(sampleTable = NULL, countTable = NULL, colData = NULL, retExplore = F)
+autoDE(sampleTable = NULL, countTable = NULL, colData = NULL, expFilt=0, retExplore = F)
 }
 \arguments{
 \item{sampleTable}{Filename indicating the sampleTable tab delimited file pointing to HTSeq-count files.}
@@ -12,6 +12,8 @@ autoDE(sampleTable = NULL, countTable = NULL, colData = NULL, retExplore = F)
 \item{countTable}{Filename indicating the raw count table tab delimited file (use for featureCounts output and with colData)}
 
 \item{colData}{Filename indicating the tab delimited file containing metadata for countTable}
+
+\item{expFilt}{Numeric indicating the minimum average gene counts to consider a gene as being 'expressed'. If whole number, average gene count across all samples must be greater than this number. Default=0.}
 
 \item{retExplore}{Boolean indicating if BinfTools::exploreData() function should also be returned. Requires gene symbols, and BinfTools/gpGeneSets packages. Default=F}
 }

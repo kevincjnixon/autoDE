@@ -5,11 +5,12 @@
 #' @param sampleTable Filename indicating the sampleTable tab delimited file pointing to HTSeq-count files.
 #' @param countTable Filename indicating the raw count table tab delimited file (use for featureCounts output and with colData)
 #' @param colData Filename indicating the tab delimited file containing metadata for countTable
+#' @param expFilt Numeric indicating the minimum average gene counts to consider a gene as being 'expressed'. If whole number, average gene count across all samples must be greater than this number. Default=0.
 #' @param retExplore Boolean indicating if BinfTools::exploreData() function should also be returned. Requires gene symbols, and BinfTools/gpGeneSets packages. Default=F
 #' @return List with DESeq2 analyzed data: results, normalized counts, and conditions
 #' @export
 
-autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, retExplore=F){
+autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, retExplore=F){
   dds<-NULL
   condition<-NULL
   conName<-NULL #contrast name
@@ -133,8 +134,8 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, retExplore=F){
     }
   }
   message("DESeq2 dataset built!")
-  message("Filtering genes with no reads in any sample.")
-  dds<-dds[rowMeans(DESeq2::counts(dds))>0,]
+  message("Filtering to keep genes with >",expFilt," reads in any sample.")
+  dds<-dds[rowMeans(DESeq2::counts(dds))>expFilt,]
 
   message("Running DESeq2.")
   dds<-DESeq2::DESeq(dds)
