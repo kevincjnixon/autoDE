@@ -203,7 +203,7 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
             opt<-2
             auot<-T
           }
-          if(length(grep("FBgn", rownames(normCoutns)))>0){
+          if(length(grep("FBgn", rownames(normCounts)))>0){
             message("Flybase gene IDs detected...")
             opt<-3
             auto<-T
