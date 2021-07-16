@@ -232,6 +232,33 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
       return(list(normCounts=normCounts, res=res, condition=condition, explore=explore))
     }
   } else{
+    if(isTRUE(detID)){
+      opt<-NULL
+      auto<-F
+      if(length(grep("ENSG", rownames(normCounts)))>0){
+        message("Human Ensembl IDs detected...")
+        opt<-1
+        auto<-T
+      }
+      if(length(grep("ENSMUSG", rownames(normCounts)))>0){
+        message("Mouse Ensembl IDs detected...")
+        opt<-2
+        auot<-T
+      }
+      if(length(grep("FBgn", rownames(normCounts)))>0){
+        message("Flybase gene IDs detected...")
+        opt<-3
+        auto<-T
+      }
+      if(isFALSE(auto)){
+        message("Cannot detect species automatically...")
+        detID<-F
+      }
+      options<-c("hsapiens","mmusculus","dmelanogaster")
+      targets<-c("HGNC","MGI","FLYBASENAME_GENE")
+      res<-lapply(res, BinfTools::getSym, obType="res", species=options[opt], target=targets[opt], addCol=T)
+      normCounts<-BinfTools::getSym(normCounts, obType="counts", species=options[opt], target=targets[opt], addCol=T)
+    }
     return(list(normCounts=normCounts, res=res, condition=condition))
   }
 }
