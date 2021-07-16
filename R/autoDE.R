@@ -264,6 +264,8 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
       if(is.list(res)){
         res<-lapply(res, BinfTools::getSym, obType="res", species=options[opt], target=targets[opt], addCol=T)
       } else {
+        message("Made it here!")
+        print(head(res))
         res<-BinfTools::getSym(res, obType="res", species=options[opt], target=targets[opt], addCol=T)
       }
       normCounts<-BinfTools::getSym(normCounts, obType="counts", species=options[opt], target=targets[opt], addCol=T)
