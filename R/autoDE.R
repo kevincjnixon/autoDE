@@ -178,10 +178,8 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
         condList[[i]]<-condition
         names(countList)[i]<-names(res)[i]
         names(condList)[i]<-names(res)[i]
-      } else {
-        countList<-normCounts
-        condList<-condition
       }
+    }
       res2<-res
       ID<-FALSE
       type<-NULL
@@ -238,11 +236,7 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
       }
       explore<-BinfTools::exploreData(res=res2, counts=countList, cond=condList)
       return(list(normCounts=normCounts, res=res, condition=condition, explore=explore))
-    } else{
-      explore<-BinfTools::exploreData(res=res, counts=normCounts, cond=condition)
-      return(list(normCounts=normCounts, res=res, condition=condition, explore=explore))
-    }
-  } else{
+  } else {
     if(isTRUE(detID)){
       opt<-NULL
       auto<-F
@@ -254,7 +248,7 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
       if(length(grep("ENSMUSG", rownames(normCounts)))>0){
         message("Mouse Ensembl IDs detected...")
         opt<-2
-        auot<-T
+        auto<-T
       }
       if(length(grep("FBgn", rownames(normCounts)))>0){
         message("Flybase gene IDs detected...")
