@@ -170,7 +170,7 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
   if(isTRUE(retExplore)){
     countList<-NULL
     condList<-NULL
-    if(is.list(res)){
+    if(class(res) =="list"){
       countList<-list()
       condList<-list()
       for(i in 1:length(res)){
@@ -224,7 +224,7 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
       options<-c("hsapiens","mmusculus","dmelanogaster")
       targets<-c("HGNC","MGI","FLYBASENAME_GENE")
       res2<-NULL
-      if(is.list(res)){
+      if(class(res) =="list"){
         res2<-lapply(res, BinfTools::getSym, obType="res", species=options[opt], target=targets[opt])
         countList<-lapply(countList, BinfTools::getSym, obType="counts", species=options[opt], target=targets[opt])
         res<-lapply(res, BinfTools::getSym, obType="res", species=options[opt], target=targets[opt], addCol=T)
@@ -261,7 +261,7 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
       }
       options<-c("hsapiens","mmusculus","dmelanogaster")
       targets<-c("HGNC","MGI","FLYBASENAME_GENE")
-      if(is.list(res)){
+      if(class(res) =="list"){
         res<-lapply(res, BinfTools::getSym, obType="res", species=options[opt], target=targets[opt], addCol=T)
       } else {
         message("Made it here!")
