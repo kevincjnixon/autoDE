@@ -179,6 +179,9 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
         names(countList)[i]<-names(res)[i]
         names(condList)[i]<-names(res)[i]
       }
+    } else {
+      countList<-normCounts
+      condList<-condition
     }
     ID<-FALSE
     type<-NULL
@@ -228,8 +231,6 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
         countList<-lapply(countList, BinfTools::getSym, obType="counts", species=options[opt], target=targets[opt])
         res<-lapply(res, BinfTools::getSym, obType="res", species=options[opt], target=targets[opt], addCol=T)
       } else {
-        message("Made it here!")
-        print(head(res))
         res2<-BinfTools::getSym(res, obType="res", species=options[opt], target=targets[opt])
         countList<-BinfTools::getSym(countList, obType="counts", species=options[opt], target=targets[opt])
         res<-BinfTools::getSym(res, obType="res", species=options[opt], target=targets[opt], addCol=T)
