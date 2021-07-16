@@ -168,6 +168,8 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
   normCounts<-as.data.frame(DESeq2::counts(dds, normalized=T))
 
   if(isTRUE(retExplore)){
+    countList<-NULL
+    condList<-NULL
     if(is.list(res)){
       countList<-list()
       condList<-list()
@@ -176,6 +178,9 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
         condList[[i]]<-condition
         names(countList)[i]<-names(res)[i]
         names(condList)[i]<-names(res)[i]
+      } else {
+        countList<-normCounts
+        condList<-condition
       }
       res2<-res
       ID<-FALSE
@@ -220,9 +225,15 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
         }
         options<-c("hsapiens","mmusculus","dmelanogaster")
         targets<-c("HGNC","MGI","FLYBASENAME_GENE")
+        res2<-NULL
+        if(is.list(res)){
         res2<-lapply(res, BinfTools::getSym, obType="res", species=options[opt], target=targets[opt])
         countList<-lapply(countList, BinfTools::getSym, obType="counts", species=options[opt], target=targets[opt])
         res<-lapply(res, BinfTools::getSym, obType="res", species=options[opt], target=targets[opt], addCol=T)
+      } else {
+        res2<-BinfTools::getSym(res, obType="res", species=options[opt], target=targets[opt])
+        countList<-BinfTools::getSym(countList, obType="counts", species=options[opt], target=targets[opt])
+      }
         normCounts<-BinfTools::getSym(normCounts, obType="counts", species=options[opt], target=targets[opt], addCol=T)
       }
       explore<-BinfTools::exploreData(res=res2, counts=countList, cond=condList)
@@ -256,7 +267,11 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
       }
       options<-c("hsapiens","mmusculus","dmelanogaster")
       targets<-c("HGNC","MGI","FLYBASENAME_GENE")
+      if(is.list(res)){
       res<-lapply(res, BinfTools::getSym, obType="res", species=options[opt], target=targets[opt], addCol=T)
+    } else {
+      res<-BinfTools::getSym(res, obType="res", species=options[opt], target=targets[opt], addCol=T)
+    }
       normCounts<-BinfTools::getSym(normCounts, obType="counts", species=options[opt], target=targets[opt], addCol=T)
     }
     return(list(normCounts=normCounts, res=res, condition=condition))
