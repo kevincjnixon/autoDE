@@ -180,7 +180,6 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
         names(condList)[i]<-names(res)[i]
       }
     }
-    res2<-res
     ID<-FALSE
     type<-NULL
     if(length(grep("ENS", rownames(normCounts)))>0){
@@ -229,8 +228,11 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
         countList<-lapply(countList, BinfTools::getSym, obType="counts", species=options[opt], target=targets[opt])
         res<-lapply(res, BinfTools::getSym, obType="res", species=options[opt], target=targets[opt], addCol=T)
       } else {
+        message("Made it here!")
+        print(head(res))
         res2<-BinfTools::getSym(res, obType="res", species=options[opt], target=targets[opt])
         countList<-BinfTools::getSym(countList, obType="counts", species=options[opt], target=targets[opt])
+        res<-BinfTools::getSym(res, obType="res", species=options[opt], target=targets[opt], addCol=T)
       }
       normCounts<-BinfTools::getSym(normCounts, obType="counts", species=options[opt], target=targets[opt], addCol=T)
     }
@@ -264,8 +266,6 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
       if(class(res) =="list"){
         res<-lapply(res, BinfTools::getSym, obType="res", species=options[opt], target=targets[opt], addCol=T)
       } else {
-        message("Made it here!")
-        print(head(res))
         res<-BinfTools::getSym(res, obType="res", species=options[opt], target=targets[opt], addCol=T)
       }
       normCounts<-BinfTools::getSym(normCounts, obType="counts", species=options[opt], target=targets[opt], addCol=T)
