@@ -146,7 +146,7 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
   if(length(unique(condition))==2){
     message("Only one comparison to be performed.")
     message("Assuming first named condition is reference condition: ", unique(condition)[1])
-    res<-DESeq2::results(dds, contrast=c(conName, unique(condition)[2], unique(condition)[1]))
+    res<-as.data.frame(DESeq2::results(dds, contrast=c(conName, unique(condition)[2], unique(condition)[1])))
   } else {
     message("Multiple comparisons can be performed.")
     message("Performing pairwise comparisons.")
@@ -158,7 +158,7 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
           compName<-paste(unique(condition)[k], unique(condition)[i], sep="v")
           message("Making results for: ", compName)
           #message("Storing in res[[",index,"]]")
-          res[[index]]<-DESeq2::results(dds, contrast=c(conName, unique(condition)[k], unique(condition)[i]))
+          res[[index]]<-as.data.frame(DESeq2::results(dds, contrast=c(conName, unique(condition)[k], unique(condition)[i])))
           names(res)[index]<-compName
           index<-index+1
         }
@@ -180,51 +180,51 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
         names(condList)[i]<-names(res)[i]
       }
     }
-      res2<-res
-      ID<-FALSE
-      type<-NULL
-      if(length(grep("ENS", rownames(normCounts)))>0){
-        ID<-TRUE
-        type<-"Ensembl"
-      }
-      if(length(grep("FBgn", rownames(normCounts)))>0){
-        ID<-TRUE
-        type<-"Flybase"
-      }
-      if(isTRUE(ID)){
-        message(type," Gene IDs detected and must be converted to gene symbols for exploreData.")
-        opt<-NULL
-        if(isTRUE(detID)){
-          auto<-F
-          if(length(grep("ENSG", rownames(normCounts)))>0){
-            message("Human Ensembl IDs detected...")
-            opt<-1
-            auto<-T
-          }
-          if(length(grep("ENSMUSG", rownames(normCounts)))>0){
-            message("Mouse Ensembl IDs detected...")
-            opt<-2
-            auot<-T
-          }
-          if(length(grep("FBgn", rownames(normCounts)))>0){
-            message("Flybase gene IDs detected...")
-            opt<-3
-            auto<-T
-          }
-          if(isFALSE(auto)){
-            message("Cannot detect species automatically...")
-            detID<-F
-          }
+    res2<-res
+    ID<-FALSE
+    type<-NULL
+    if(length(grep("ENS", rownames(normCounts)))>0){
+      ID<-TRUE
+      type<-"Ensembl"
+    }
+    if(length(grep("FBgn", rownames(normCounts)))>0){
+      ID<-TRUE
+      type<-"Flybase"
+    }
+    if(isTRUE(ID)){
+      message(type," Gene IDs detected and must be converted to gene symbols for exploreData.")
+      opt<-NULL
+      if(isTRUE(detID)){
+        auto<-F
+        if(length(grep("ENSG", rownames(normCounts)))>0){
+          message("Human Ensembl IDs detected...")
+          opt<-1
+          auto<-T
         }
-        if(isFALSE(detID)){
-          message("Please indicate the species of your samples:")
-          print(paste(c(1:3),c("Human","Mouse","Drosophila")))
-          opt<-as.numeric(readline("Enter your selection: "))
+        if(length(grep("ENSMUSG", rownames(normCounts)))>0){
+          message("Mouse Ensembl IDs detected...")
+          opt<-2
+          auot<-T
         }
-        options<-c("hsapiens","mmusculus","dmelanogaster")
-        targets<-c("HGNC","MGI","FLYBASENAME_GENE")
-        res2<-NULL
-        if(is.list(res)){
+        if(length(grep("FBgn", rownames(normCounts)))>0){
+          message("Flybase gene IDs detected...")
+          opt<-3
+          auto<-T
+        }
+        if(isFALSE(auto)){
+          message("Cannot detect species automatically...")
+          detID<-F
+        }
+      }
+      if(isFALSE(detID)){
+        message("Please indicate the species of your samples:")
+        print(paste(c(1:3),c("Human","Mouse","Drosophila")))
+        opt<-as.numeric(readline("Enter your selection: "))
+      }
+      options<-c("hsapiens","mmusculus","dmelanogaster")
+      targets<-c("HGNC","MGI","FLYBASENAME_GENE")
+      res2<-NULL
+      if(is.list(res)){
         res2<-lapply(res, BinfTools::getSym, obType="res", species=options[opt], target=targets[opt])
         countList<-lapply(countList, BinfTools::getSym, obType="counts", species=options[opt], target=targets[opt])
         res<-lapply(res, BinfTools::getSym, obType="res", species=options[opt], target=targets[opt], addCol=T)
@@ -232,10 +232,10 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
         res2<-BinfTools::getSym(res, obType="res", species=options[opt], target=targets[opt])
         countList<-BinfTools::getSym(countList, obType="counts", species=options[opt], target=targets[opt])
       }
-        normCounts<-BinfTools::getSym(normCounts, obType="counts", species=options[opt], target=targets[opt], addCol=T)
-      }
-      explore<-BinfTools::exploreData(res=res2, counts=countList, cond=condList)
-      return(list(normCounts=normCounts, res=res, condition=condition, explore=explore))
+      normCounts<-BinfTools::getSym(normCounts, obType="counts", species=options[opt], target=targets[opt], addCol=T)
+    }
+    explore<-BinfTools::exploreData(res=res2, counts=countList, cond=condList)
+    return(list(normCounts=normCounts, res=res, condition=condition, explore=explore))
   } else {
     if(isTRUE(detID)){
       opt<-NULL
@@ -262,10 +262,10 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
       options<-c("hsapiens","mmusculus","dmelanogaster")
       targets<-c("HGNC","MGI","FLYBASENAME_GENE")
       if(is.list(res)){
-      res<-lapply(res, BinfTools::getSym, obType="res", species=options[opt], target=targets[opt], addCol=T)
-    } else {
-      res<-BinfTools::getSym(res, obType="res", species=options[opt], target=targets[opt], addCol=T)
-    }
+        res<-lapply(res, BinfTools::getSym, obType="res", species=options[opt], target=targets[opt], addCol=T)
+      } else {
+        res<-BinfTools::getSym(res, obType="res", species=options[opt], target=targets[opt], addCol=T)
+      }
       normCounts<-BinfTools::getSym(normCounts, obType="counts", species=options[opt], target=targets[opt], addCol=T)
     }
     return(list(normCounts=normCounts, res=res, condition=condition))
