@@ -7,10 +7,11 @@
 #' @param colData Filename indicating the tab delimited file containing metadata for countTable
 #' @param expFilt Numeric indicating the minimum average gene counts to consider a gene as being 'expressed'. If whole number, average gene count across all samples must be greater than this number. Default=0.
 #' @param retExplore Boolean indicating if BinfTools::exploreData() function should also be returned. Requires gene symbols, and BinfTools/gpGeneSets packages. Default=F
+#' @param detID Boolean indicating if ENSEMBL or Flybase gene IDs should be automatically detected for conversion to symbos using BinfTools::getSym(). Defatul=T
 #' @return List with DESeq2 analyzed data: results, normalized counts, and conditions
 #' @export
 
-autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, retExplore=F){
+autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, retExplore=F, detID=T){
   dds<-NULL
   condition<-NULL
   conName<-NULL #contrast name
@@ -189,11 +190,36 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
       }
       if(isTRUE(ID)){
         message(type," Gene IDs detected and must be converted to gene symbols for exploreData.")
-        message("Please indicate the species of your samples:")
-        print(paste(c(1:3),c("Human","Mouse","Drosophila")))
+        opt<-NULL
+        if(isTRUE(detID)){
+          auto<-F
+          if(length(grep("ENSG", rownames(normCounts)))>0){
+            message("Human Ensembl IDs detected...")
+            opt<-1
+            auto<-T
+          }
+          if(length(grep("ENSMUSG", rownames(normCounts)))>0){
+            message("Mouse Ensembl IDs detected...")
+            opt<-2
+            auot<-T
+          }
+          if(length(grep("FBgn", rownames(normCoutns)))>0){
+            message("Flybase gene IDs detected...")
+            opt<-3
+            auto<-T
+          }
+          if(isFALSE(auto)){
+            message("Cannot detect species automatically...")
+            detID<-F
+          }
+        }
+        if(isFALSE(detID)){
+          message("Please indicate the species of your samples:")
+          print(paste(c(1:3),c("Human","Mouse","Drosophila")))
+          opt<-as.numeric(readline("Enter your selection: "))
+        }
         options<-c("hsapiens","mmusculus","dmelanogaster")
         targets<-c("HGNC","MGI","FLYBASENAME_GENE")
-        opt<-as.numeric(readline("Enter your selection: "))
         res2<-lapply(res, BinfTools::getSym, obType="res", species=options[opt], target=targets[opt])
         countList<-lapply(countList, BinfTools::getSym, obType="counts", species=options[opt], target=targets[opt])
         res<-lapply(res, BinfTools::getSym, obType="res", species=options[opt], target=targets[opt], addCol=T)
