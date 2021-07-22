@@ -4,7 +4,7 @@
 \alias{autoDE}
 \title{Automatic Differential Expression Analysis using DESeq2}
 \usage{
-autoDE(sampleTable = NULL, countTable = NULL, colData = NULL, expFilt=0, retExplore = F, detID=T)
+autoDE(sampleTable = NULL, countTable = NULL, colData = NULL, expFilt=0, retExplore = F, retDDS=F, detID=T)
 }
 \arguments{
 \item{sampleTable}{Filename indicating the sampleTable tab delimited file pointing to HTSeq-count files.}

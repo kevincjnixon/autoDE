@@ -12,7 +12,7 @@
 #' @return List with DESeq2 analyzed data: results, normalized counts, and conditions
 #' @export
 
-autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, retExplore=F, detID=T){
+autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, retExplore=F, retDDS=F, detID=T){
   dds<-NULL
   condition<-NULL
   conName<-NULL #contrast name
