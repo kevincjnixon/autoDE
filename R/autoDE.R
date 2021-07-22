@@ -7,6 +7,7 @@
 #' @param colData Filename indicating the tab delimited file containing metadata for countTable
 #' @param expFilt Numeric indicating the minimum average gene counts to consider a gene as being 'expressed'. If whole number, average gene count across all samples must be greater than this number. Default=0.
 #' @param retExplore Boolean indicating if BinfTools::exploreData() function should also be returned. Requires gene symbols, and BinfTools/gpGeneSets packages. Default=F
+#' @param retDDS Boolean indicating if the DESeq2 dataset (dds) should be returned for further usage. Defaults to FALSE.
 #' @param detID Boolean indicating if ENSEMBL or Flybase gene IDs should be automatically detected for conversion to symbos using BinfTools::getSym(). Defatul=T
 #' @return List with DESeq2 analyzed data: results, normalized counts, and conditions
 #' @export
@@ -140,7 +141,9 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
 
   message("Running DESeq2.")
   dds<-DESeq2::DESeq(dds)
-
+  message("Performing PCA.")
+  vst<-DESeq2::varianceStabilizingTransformation(dds)
+  print(DESeq2::plotPCA(vst, intgroup="condition"))
   res<-NULL
   message(length(unique(condition)), " conditions identified.")
   if(length(unique(condition))==2){
@@ -238,7 +241,11 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
       normCounts<-BinfTools::getSym(normCounts, obType="counts", species=options[opt], target=targets[opt], addCol=T)
     }
     explore<-BinfTools::exploreData(res=res2, counts=countList, cond=condList)
+    if(isFALSE(retDDS)){
     return(list(normCounts=normCounts, res=res, condition=condition, explore=explore))
+  } else {
+    return(list(normCounts=normCounts, res=res, condition=condition, explore=explore, dds=dds))
+  }
   } else {
     if(isTRUE(detID)){
       opt<-NULL
@@ -271,6 +278,10 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
       }
       normCounts<-BinfTools::getSym(normCounts, obType="counts", species=options[opt], target=targets[opt], addCol=T)
     }
+    if(isFALSE(retDDS)){
     return(list(normCounts=normCounts, res=res, condition=condition))
+  } else {
+    return(list(normCounts=normCounts, res=res, condition=condition, dds=dds))
+  }
   }
 }
