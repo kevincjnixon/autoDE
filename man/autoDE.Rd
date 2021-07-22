@@ -17,6 +17,8 @@ autoDE(sampleTable = NULL, countTable = NULL, colData = NULL, expFilt=0, retExpl
 
 \item{retExplore}{Boolean indicating if BinfTools::exploreData() function should also be returned. Requires gene symbols, and BinfTools/gpGeneSets packages. Default=F}
 
+\item{retDDS}{Boolean indicating if the DESeq2 dataset (dds) should be returned for further usage. Defaults to FALSE.}
+
 \item{detID}{Boolean indicating if ENSEMBL or Flybase gene IDs should be automatically detected for conversion to symbos using BinfTools::getSym(). Defatul=T}
 }
 \value{
