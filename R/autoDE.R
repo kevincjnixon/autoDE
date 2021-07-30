@@ -143,13 +143,13 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
   dds<-DESeq2::DESeq(dds)
   message("Performing PCA.")
   vsd<-DESeq2::varianceStabilizingTransformation(dds)
-  print(DESeq2::plotPCA(vsd, intgroup="condition"))
+  print(DESeq2::plotPCA(vsd, intgroup=conName))
   if(length(grep("Batch", colnames(SummarizedExperiment::colData(dds))))>0){
     vsd$Batch<-factor(vsd$Batch)
     print(DESeq2::plotPCA(vsd, intgroup="Batch"))
     message("Removing batch effect for PCA...")
     SummarizedExperiment::assay(vsd)<-limma::removeBatchEffect(SummarizedExperiment::assay(vsd), vsd$Batch)
-    print(DESeq2::plotPCA(vsd, intgroup="condition"))
+    print(DESeq2::plotPCA(vsd, intgroup=conName))
     print(DESeq2::plotPCA(vsd, intgroup="Batch"))
   }
   res<-NULL
