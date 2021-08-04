@@ -247,6 +247,8 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
         res<-BinfTools::getSym(res, obType="res", species=options[opt], target=targets[opt], addCol=T)
       }
       normCounts<-BinfTools::getSym(normCounts, obType="counts", species=options[opt], target=targets[opt], addCol=T)
+    } else {
+      res2<-res
     }
     explore<-BinfTools::exploreData(res=res2, counts=countList, cond=condList)
     if(isFALSE(retDDS)){
