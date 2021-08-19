@@ -136,8 +136,10 @@ autoDE<-function(sampleTable=NULL, countTable=NULL, colData=NULL, expFilt=0, ret
     }
   }
   message("DESeq2 dataset built!")
-  message("Filtering to keep genes with >",expFilt," reads in any sample.")
-  dds<-dds[rowMeans(DESeq2::counts(dds))>expFilt,]
+  if(!is.null(expFilt)){
+    message("Filtering to keep genes with >",expFilt," reads in any sample.")
+    dds<-dds[rowMeans(DESeq2::counts(dds))>expFilt,]
+  }
 
   message("Running DESeq2.")
   dds<-DESeq2::DESeq(dds)
